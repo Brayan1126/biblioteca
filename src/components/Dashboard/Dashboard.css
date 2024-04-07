@@ -1,0 +1,14 @@
+.welcome {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contentText {
+    text-align: center;
+    height: 30vh;
+    width: 60vw;
+    border-radius: 5px;
+    border: 2px solid black;
+    margin-top: 14vw;
+}
