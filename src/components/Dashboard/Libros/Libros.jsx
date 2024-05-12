@@ -7,6 +7,7 @@ export const Libros = () => {
     const [nuevoLibro, setNuevoLibro] = useState({ nombre: '', genero: '', autor: '', ISBN: '', disponible: '' });
     const [mostrarModal, setMostrarModal] = useState(false);
     const [indiceEditar, setIndiceEditar] = useState(null);
+    const [busqueda, setBusqueda] = useState('');
 
     // Función para cargar libros desde el almacenamiento local
     useEffect(() => {
@@ -22,12 +23,16 @@ export const Libros = () => {
         setNuevoLibro({ ...nuevoLibro, [name]: value });
     };
 
+    // Función para manejar cambios en el input de búsqueda
+    const handleBusquedaChange = (event) => {
+        setBusqueda(event.target.value);
+    };
+
     // Función para agregar un nuevo libro o guardar uno editado
     const guardarLibro = (event) => {
         event.preventDefault(); // Evitar el comportamiento predeterminado del formulario
-        console.log(nuevoLibro);
         if (nuevoLibro.disponible === false) {
-            alert("El libro no se puede editar porque no esta disponible.");
+            alert("El libro no se puede editar porque no está disponible.");
             return; // Evitar que se guarde el libro
         }
         const libro = { ...nuevoLibro, disponible: true };
@@ -65,8 +70,20 @@ export const Libros = () => {
         setMostrarModal(true);
     };
 
+    // Filtrar libros según el término de búsqueda
+    const librosFiltrados = libros.filter((libro) => {
+        const valoresLibro = Object.values(libro).join(' ').toLowerCase();
+        return valoresLibro.includes(busqueda.toLowerCase());
+    });
+
     return (
         <div className='librosContainer'>
+            <input
+                type="text"
+                placeholder="Buscar libro..."
+                value={busqueda}
+                onChange={handleBusquedaChange}
+            />
             <button className='buttonAgg' onClick={() => setMostrarModal(true)}>+ Agregar Libro</button>
             {mostrarModal && (
                 <div className="modal">
@@ -129,7 +146,7 @@ export const Libros = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {libros.map((libro, index) => (
+                    {librosFiltrados.map((libro, index) => (
                         <tr key={index}>
                             <td>{libro.nombre}</td>
                             <td>{libro.genero}</td>

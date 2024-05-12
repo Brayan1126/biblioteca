@@ -11,6 +11,7 @@ export const Reservar = () => {
         fechaEntrega: '',
     });
     const [mostrarModal, setMostrarModal] = useState(false);
+    const [busqueda, setBusqueda] = useState('');
 
     useEffect(() => {
         const reservasGuardadas = JSON.parse(localStorage.getItem('reservas'));
@@ -35,10 +36,14 @@ export const Reservar = () => {
         setNuevaReserva({ ...nuevaReserva, [name]: value });
     };
 
+    const handleBusquedaChange = (event) => {
+        setBusqueda(event.target.value);
+    };
+
     const guardarReserva = (event) => {
         event.preventDefault();
         const libroSeleccionado = libros.find(libro => libro.nombre === nuevaReserva.libroId);
-        if (libroSeleccionado && libroSeleccionado.disponible !== false ) {
+        if (libroSeleccionado && libroSeleccionado.disponible !== false) {
             const reserva = { ...nuevaReserva };
             reserva.fechaEntrega = new Date().toISOString().slice(0, 10);
             const nuevasReservas = [...reservas, reserva];
@@ -85,8 +90,30 @@ export const Reservar = () => {
         }
     };
 
+    const editarReserva = (index) => {
+        // Actualizar la fecha de devolución solo si no tiene valor
+        if (!reservas[index].fechaDevolucion) {
+            const nuevasReservas = [...reservas];
+            nuevasReservas[index] = { ...reservas[index], fechaDevolucion: new Date().toISOString().slice(0, 10) };
+            setReservas(nuevasReservas);
+            localStorage.setItem('reservas', JSON.stringify(nuevasReservas));
+        }
+    };
+
+    // Filtrar reservas según el término de búsqueda
+    const reservasFiltradas = reservas.filter((reserva) => {
+        const valoresReserva = Object.values(reserva).join(' ').toLowerCase();
+        return valoresReserva.includes(busqueda.toLowerCase());
+    });
+
     return (
         <div className='reservarContainer'>
+            <input
+                type="text"
+                placeholder="Buscar reserva..."
+                value={busqueda}
+                onChange={handleBusquedaChange}
+            />
             <button className='buttonAgg' onClick={() => setMostrarModal(true)}>+ Crear Reserva</button>
             {mostrarModal && (
                 <div className="modal">
@@ -132,15 +159,19 @@ export const Reservar = () => {
                         <th>Usuario</th>
                         <th>Libro</th>
                         <th>Fecha de reserva</th>
+                        <th>Fecha de devolución</th>
+                        <th>Entregar</th>
                         <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {reservas.map((reserva, index) => (
+                    {reservasFiltradas.map((reserva, index) => (
                         <tr key={index}>
                             <td>{reserva.usuarioId}</td>
                             <td>{reserva.libroId}</td>
                             <td>{reserva.fechaEntrega}</td>
+                            <td>{reserva.fechaDevolucion || '-'}</td>
+                            <td><button onClick={() => editarReserva(index)}>Entregar libro</button></td>
                             <td><button onClick={() => eliminarReserva(index)}>Eliminar</button></td>
                         </tr>
                     ))}

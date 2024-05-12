@@ -8,6 +8,8 @@ export const Usuarios = () => {
     const [nuevoUsuario, setNuevoUsuario] = useState({ nombre: '', apellido: '', documento: '', correo: '' });
     const [mostrarModal, setMostrarModal] = useState(false);
     const [indiceEditar, setIndiceEditar] = useState(null);
+    const [busqueda, setBusqueda] = useState('');
+
     // Función para cargar usuarios desde el almacenamiento local
     useEffect(() => {
         const usuariosGuardados = JSON.parse(localStorage.getItem('usuarios'));
@@ -20,6 +22,11 @@ export const Usuarios = () => {
     const handleChange = (event) => {
         const { name, value } = event.target;
         setNuevoUsuario({ ...nuevoUsuario, [name]: value });
+    };
+
+    // Función para manejar cambios en el input de búsqueda
+    const handleBusquedaChange = (event) => {
+        setBusqueda(event.target.value);
     };
 
     // Función para agregar un nuevo usuario
@@ -60,8 +67,20 @@ export const Usuarios = () => {
         setMostrarModal(true);
     };
 
+    // Filtrar usuarios según el término de búsqueda
+    const usuariosFiltrados = usuarios.filter((usuario) => {
+        const valoresUsuario = Object.values(usuario).join(' ').toLowerCase();
+        return valoresUsuario.includes(busqueda.toLowerCase());
+    });
+
     return (
         <div className='usersContainer'>
+            <input
+                type="text"
+                placeholder="Buscar usuario..."
+                value={busqueda}
+                onChange={handleBusquedaChange}
+            />
             <button className='buttonAgg' onClick={() => setMostrarModal(true)}>+ Agregar Usuario</button>
             {mostrarModal && (
                 <div className="modal">
@@ -123,7 +142,7 @@ export const Usuarios = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {usuarios.map((usuario, index) => (
+                    {usuariosFiltrados.map((usuario, index) => (
                         <tr key={index}>
                             <td>{usuario.nombre}</td>
                             <td>{usuario.apellido}</td>
